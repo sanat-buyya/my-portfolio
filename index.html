@@ -35,6 +35,8 @@ body {
             background-color: #f9f9f9;
             color: #333;
             line-height: 1.6;
+             background: linear-gradient(120deg, #f9f9f9 0%, #e0eafc 100%);
+
         }
 
         .container {
@@ -145,7 +147,7 @@ body {
 
         /* Home Section */
         .home-section {
-            min-height: 100vh;
+            min-height: 88vh;
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, var(--dark) 0%, #34495e 100%);
@@ -352,36 +354,57 @@ nav a:hover::after {
 
         /* Skills Section */
         .skills-section {
-            background-color: #f5f5f5;
-        }
+    padding: 80px 0;
+    background-color: #f8f9fa;
+}
 
-        .skills-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    color: #333;
+}
 
-        .skill-item {
-            margin-bottom: 30px;
-        }
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-        .skill-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
+.skill-card {
+    background: rgb(1, 33, 61);
+    padding: 40px 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e9ecef;
+}
 
-        .skill-bar {
-            height: 10px;
-            background: #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-        }
+.skill-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    background: rgb(32, 54, 75);
+}
 
-        .skill-progress {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 5px;
-        }
+.skill-logo {
+    margin-bottom: 20px;
+}
+
+.skill-logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.skill-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
 
         /* Projects Section */
         .projects-section {
@@ -560,7 +583,6 @@ nav a:hover::after {
             width: 100%;
         }
         
-        /* Mobile Responsiveness */
         @media (max-width: 992px) {
             .home-content,
             .about-content,
@@ -651,14 +673,18 @@ nav a:hover::after {
             }
         }
         section {
-    padding: 50px 0; /* Reduced from 80px to 50px */
+    padding: 50px 0;
 }
-        /* Move profile image to the top in the home section for mobile */
 @media (max-width: 768px) {
     .home-content {
         flex-direction: column; 
         align-items: center;  
         gap: 15px;
+    }
+     .home-section {
+        min-height: 60vh;
+        padding-top: 60px;
+        padding-bottom: 20px;
     }
 
     .home-image {
@@ -672,11 +698,78 @@ nav a:hover::after {
     }
 
     .home-buttons {
-        justify-content: center; /* Center align buttons */
+        justify-content: center;
     }
     section {
-        padding: 30px 0; /* Further reduce padding for mobile devices */
+        padding: 30px 0;
     }
+}
+@media (max-width: 768px) {
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .skill-card {
+        padding: 30px 15px;
+    }
+    
+    .skill-logo img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .skill-name {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .skill-card {
+        padding: 25px 15px;
+    }
+}
+.static-text {
+    color: white;
+    flex-shrink: 0;
+}
+
+.dynamic-text {
+    color: #bdd713e4;
+    font-weight: bold;
+    position: relative;
+}
+
+.dynamic-text::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: #bdd713e4;
+    animation: blink 1s infinite;
+}
+
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+@keyframes typing {
+    0% { width: 0; }
+    100% { width: 100%; }
+}
+
+@keyframes deleting {
+    0% { width: 100%; }
+    100% { width: 0; }
 }
     </style>
 </head>
@@ -701,7 +794,10 @@ nav a:hover::after {
             <div class="home-content">
                 <div class="home-text">
                     <h1><span>Sanat Buyya</span></h1>
-                    <h2>Full Stack Developer</h2>
+                    <h2>
+    <span class="static-text">I'm a </span>
+    <span class="dynamic-text"></span>
+</h2>
                     <p>Through my projects and training, I have developed a strong understanding of software design, database management, and problem-solving.</p>
                     <div class="home-buttons">
                         <a href="#contact" class="btn">Contact Me</a>
@@ -729,7 +825,7 @@ nav a:hover::after {
                     <h3>Who am I?</h3>
                     <p>I am a recent Engineering graduate with a solid foundation in software development and programming. Skilled in Java, Spring Boot, I have also completed a Java Full Stack Development Course, which enhanced my practical knowledge and hands-on experience in building robust applications.</p><br>
                     
-                    <p>My technical expertise includes:</p><br>
+                    <p><b> My technical expertise includes:</b></p><br>
                         
                     <p>Java, Spring Framework (IOC, MVC), Spring Data JPA, Spring Boot, Hibernate, JDBC, Object-Oriented Programming, SQL, PLSQL, MySQL, HTML, CSS, Javascript, ReactJS</p><br>
                         
@@ -771,94 +867,82 @@ nav a:hover::after {
     </section>
 
     <!-- Skills Section -->
-    <section id="skills" class="skills-section">
-        <div class="container">
-            <h2 class="section-title">My Skills</h2>
-            <div class="skills-container">
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>Java</span>
-                        <span>95%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width: 95%"></div>
-                    </div>
+<section id="skills" class="skills-section">
+    <div class="container">
+        <h2 class="section-title">My Skills</h2>
+        <div class="skills-grid">
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/java-coffee-cup-logo.png" alt="Java">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>JDBC</span>
-                        <span>95%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width: 95%"></div>
-                    </div>
+                <h3 class="skill-name">Java</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/database.png" alt="JDBC">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>Hibernate</span>
-                        <span>85%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width: 85%"></div>
-                    </div>
+                <h3 class="skill-name">JDBC</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/hibernate.png" alt="Hibernate">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>Spring Boot</span>
-                        <span>90%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width:90%"></div>
-                    </div>
+                <h3 class="skill-name">Hibernate</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/spring-logo.png" alt="Spring Boot">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>SQL</span>
-                        <span>95%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width:95%"></div>
-                    </div>
+                <h3 class="skill-name">Spring Boot</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/sql.png" alt="SQL">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>HTML</span>
-                        <span>95%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width:95%"></div>
-                    </div>
+                <h3 class="skill-name">SQL</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/mysql-logo.png" alt="MySQL">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>CSS</span>
-                        <span>90%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width:90%"></div>
-                    </div>
+                <h3 class="skill-name">MySQL</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/html-5.png" alt="HTML">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>JavaScript</span>
-                        <span>85%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width:85%"></div>
-                    </div>
+                <h3 class="skill-name">HTML</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/css3.png" alt="CSS">
                 </div>
-                <div class="skill-item">
-                    <div class="skill-info">
-                        <span>React</span>
-                        <span>80%</span>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-progress" style="width: 80%"></div>
-                    </div>
+                <h3 class="skill-name">CSS</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/color/48/000000/javascript.png" alt="JavaScript">
                 </div>
+                <h3 class="skill-name">JavaScript</h3>
+            </div>
+            
+            <div class="skill-card">
+                <div class="skill-logo">
+                    <img src="https://img.icons8.com/external-tal-revivo-color-tal-revivo/48/000000/external-react-a-javascript-library-for-building-user-interfaces-logo-color-tal-revivo.png" alt="React">
+                </div>
+                <h3 class="skill-name">React</h3>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Projects Section -->
     <section id="projects" class="projects-section">
@@ -1051,6 +1135,54 @@ document.addEventListener('scroll', () => {
         }
     });
 });
-    </script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+    const dynamicText = document.querySelector('.dynamic-text');
+    const texts = [
+        'Full Stack Developer',
+        'Android Developer', 
+        'Web Developer',
+        'Frontend Developer',
+        'Backend Developer',
+        'Web Designer'
+    ];
+    
+    let textIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let typeSpeed = 100;
+    let deleteSpeed = 50;
+    let pauseTime = 2000;
+
+    function typeWriter() {
+        const currentText = texts[textIndex];
+        
+        if (isDeleting) {
+            dynamicText.textContent = currentText.substring(0, charIndex - 1);
+            charIndex--;
+            typeSpeed = deleteSpeed;
+        } else {
+            dynamicText.textContent = currentText.substring(0, charIndex + 1);
+            charIndex++;
+            typeSpeed = 100;
+        }
+
+        if (!isDeleting && charIndex === currentText.length) {
+            // Pause at end of word
+            typeSpeed = pauseTime;
+            isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            textIndex = (textIndex + 1) % texts.length;
+            typeSpeed = 500; // Pause before typing next word
+        }
+
+        setTimeout(typeWriter, typeSpeed);
+    }
+
+    // Start the animation
+    typeWriter();
+});
+</script>
 </body>
 </html>
