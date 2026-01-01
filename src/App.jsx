@@ -26,7 +26,7 @@ import aboutImage from "../public/aboutimage.png";
 import eCommerceImage from "../public/ECommerce.png";
 import stockMarketImage from "../public/StockMarket.png";
 import cv from "../public/cv.pdf";
-import ritsBillingSuiteImage from "../public/RITSBillingSuite.png";
+import ritsBillingSuiteImage from "../public/ritsBillingSuite.png";
 import swapTicketImage from "../public/swapticket.png";
 
 // Experience duration calculator (AUTO updates)
