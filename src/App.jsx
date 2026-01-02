@@ -10,6 +10,8 @@ import {
   FaJs,
   FaHtml5,
   FaCss3Alt,
+  FaInstagram,
+  FaYoutube
 } from "react-icons/fa";
 import {
   SiSpring,
@@ -534,11 +536,12 @@ const Experience = () => {
       startDate: "2025-08-25",
       location: "Bengaluru",
       description:
-        "Working on full-stack development projects using JavaScript, React, and React Native. Contributing to building scalable applications and implementing best practices.",
+        "Working on full-stack development projects using JavaScript, React, and React Native, Node.js. Contributing to building scalable applications and implementing best practices.",
       technologies: [
         "JavaScript",
         "React JS",
         "React Native",
+        "Tailwind CSS",
         "Node.js",
         "Azure",
       ],
@@ -916,6 +919,22 @@ const Contact = () => {
                     className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
                   >
                     <FaGithub className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://instagram.com/sanat_buyya"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
+                  >
+                    <FaInstagram className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://www.youtube.com/channel/UCGxNgzjDA1yISEITXJYBUaw"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
+                  >
+                    <FaYoutube className="w-5 h-5" />
                   </a>
                 </div>
               </div>
