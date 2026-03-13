@@ -1,6 +1,6 @@
 // App.jsx
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MdEmail, MdPhone, MdLocationOn, MdPerson } from "react-icons/md";
 import {
   FaLinkedinIn,
@@ -11,7 +11,9 @@ import {
   FaHtml5,
   FaCss3Alt,
   FaInstagram,
-  FaYoutube
+  FaYoutube,
+  FaChevronCircleLeft,
+  FaChevronCircleRight,
 } from "react-icons/fa";
 import {
   SiSpring,
@@ -92,7 +94,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <Header activeSection={activeSection} />
       <Home />
       <About />
@@ -255,8 +257,8 @@ const Home = () => {
   }, [displayText, isDeleting, textIndex]);
 
   return (
-    <section id="home" className="min-h-screen flex items-center pt-20">
-      <div className="container mx-auto px-4 py-12">
+    <section id="home" className="w-full min-h-screen flex items-center pt-12">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -269,9 +271,8 @@ const Home = () => {
               <h1 className="text-5xl md:text-6xl font-bold mt-2 mb-4">
                 Sanat <span className="text-blue-400">Buyya</span>
               </h1>
-              <div className="h-12 flex items-center">
+              <div className="h-5 flex items-center">
                 <span className="text-xl md:text-2xl">
-                  
                   <span className="text-blue-400 font-bold">
                     {displayText}
                     <span className="animate-pulse">|</span>
@@ -342,7 +343,7 @@ const Home = () => {
 // About Component
 const About = () => {
   return (
-    <section id="about" className="py-20">
+    <section id="about" className="py-12">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -494,7 +495,7 @@ const Skills = () => {
   ];
 
   return (
-    <section id="skills" className="py-20 bg-gray-800/50">
+    <section id="skills" className="py-12 bg-gray-800/50">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -549,7 +550,7 @@ const Experience = () => {
   ];
 
   return (
-    <section id="experience" className="py-20">
+    <section id="experience" className="py-12">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -644,6 +645,8 @@ const Experience = () => {
 
 // Projects Component
 const Projects = () => {
+  const [current, setCurrent] = useState(0);
+
   const projects = [
     {
       title: "RITS Billing Suite",
@@ -712,87 +715,100 @@ const Projects = () => {
     },
   ];
 
-  const shouldScroll = projects.length > 3;
-  const displayProjects = shouldScroll ? [...projects, ...projects] : projects;
+  const nextSlide = () => {
+    setCurrent((prev) => (prev + 1) % projects.length);
+  };
+
+  const prevSlide = () => {
+    setCurrent((prev) => (prev - 1 + projects.length) % projects.length);
+  };
 
   return (
-    <section id="projects" className="py-20 bg-gray-800/50 overflow-hidden">
+    <section id="projects" className="py-12 bg-gray-800/50">
       <div className="container mx-auto px-4">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-4xl font-bold text-center mb-12"
-        >
+        <h2 className="text-4xl font-bold text-center mb-12">
           My <span className="text-blue-400">Projects</span>
-        </motion.h2>
+        </h2>
 
-        <div className="relative overflow-hidden">
-          <motion.div
-            className="flex gap-8"
-            animate={shouldScroll ? { x: ["0%", "-100%"] } : { x: 0 }}
-            transition={
-              shouldScroll
-                ? {
-                    duration: 15,
-                    ease: "linear",
-                    repeat: Infinity,
-                  }
-                : {}
-            }
-          >
-            {displayProjects.map((project, index) => (
-              <div
-                key={index}
-                className="min-w-[300px] md:min-w-[350px] lg:min-w-[380px]"
-              >
-                <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden hover:border-blue-400/50 transition-all duration-300 hover:scale-105 h-full">
-                  <div className="h-48 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-                    {project.image ? (
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-4xl">🚀</span>
-                    )}
-                  </div>
+        <div className="relative max-w-3xl mx-auto">
+          {/* Slide */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current}
+              initial={{ opacity: 0, x: 80 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -80 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gray-900/50 border border-gray-700 rounded-xl overflow-hidden h-[520px] flex flex-col"
+            >
+              <div className="h-56">
+                <img
+                  src={projects[current].image}
+                  alt={projects[current].title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-                  <div className="p-6">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-xl font-bold">{project.title}</h3>
-                      <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-xs font-semibold">
-                        {project.status}
-                      </span>
-                    </div>
+              <div className="p-6 flex flex-col flex-1">
+                <div className="flex justify-between">
+                  <h3 className="text-xl font-bold">
+                    {projects[current].title}
+                  </h3>
 
-                    <h4 className="font-semibold text-sm text-gray-400 mb-4">
-                      {project.applicationType}
-                    </h4>
+                  <span className="px-3 py-1 flex items-center bg-green-600/20 text-green-400 rounded-full text-xs">
+                    {projects[current].status}
+                  </span>
+                </div>
 
-                    <p className="text-gray-300 mb-6">{project.description}</p>
+                <h4 className="text-sm text-gray-400 mt-1 mb-4">
+                  {projects[current].applicationType}
+                </h4>
 
-                    <div>
-                      <h4 className="font-semibold mb-3 text-sm text-gray-400">
-                        Technologies:
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {project.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-3 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                <p className="text-gray-300 mb-4 line-clamp-3">
+                  {projects[current].description}
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {projects[current].technologies.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-3 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs"
+                    >
+                      {tech}
+                    </span>
+                  ))}
                 </div>
               </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation Buttons */}
+          <button
+            onClick={prevSlide}
+            className="absolute top-1/2 -left-4 md:-left-12 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full hover:bg-gray-700"
+          >
+            <FaChevronCircleLeft size={25} />
+          </button>
+
+          <button
+            onClick={nextSlide}
+            className="absolute top-1/2 -right-4 md:-right-12 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full hover:bg-gray-700"
+          >
+            <FaChevronCircleRight size={25} />
+          </button>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center mt-6 gap-3">
+            {projects.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrent(index)}
+                className={`h-3 w-3 rounded-full transition-all ${
+                  current === index ? "bg-blue-400 scale-125" : "bg-gray-500"
+                }`}
+              />
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -838,7 +854,7 @@ const Contact = () => {
     } catch (error) {
       console.error("Error:", error);
       alert(
-        "There was a problem sending your message. Please try again later."
+        "There was a problem sending your message. Please try again later.",
       );
     } finally {
       setMessageSent(false);
@@ -853,7 +869,7 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20">
+    <section id="contact" className="py-12">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -877,7 +893,12 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Email</h3>
-                  <p className="text-gray-300">sanatbuyya@gmail.com</p>
+                  <a
+                    href="mailto:sanatbuyya@gmail.com"
+                    className="text-gray-300 hover:text-blue-400 hover:underline transition"
+                  >
+                    sanatbuyya@gmail.com
+                  </a>
                 </div>
               </div>
 
@@ -887,7 +908,12 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Phone</h3>
-                  <p className="text-gray-300">+91 6363356214</p>
+                  <a
+                    href="tel:+916363356214"
+                    className="text-gray-300 hover:text-blue-400 transition"
+                  >
+                    +91 6363356214
+                  </a>
                 </div>
               </div>
 
