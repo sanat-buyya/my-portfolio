@@ -1,7 +1,7 @@
 // App.jsx
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdEmail, MdPhone, MdLocationOn, MdPerson } from "react-icons/md";
+import { MdEmail, MdPhone, MdLocationOn, MdOutlineClear } from "react-icons/md";
 import {
   FaLinkedinIn,
   FaGithub,
@@ -24,14 +24,9 @@ import {
   SiMongodb,
 } from "react-icons/si";
 import { VscAzure } from "react-icons/vsc";
-import ritsLogo from "../public/ritsLogo.png";
-import profileImage from "../public/profile.jpeg";
-import aboutImage from "../public/aboutimage.png";
-import eCommerceImage from "../public/ECommerce.png";
-import stockMarketImage from "../public/StockMarket.png";
-import cv from "../public/cv.pdf";
-import ritsBillingSuiteImage from "../public/ritsBillingSuite.png";
-import swapTicketImage from "../public/swapticket.png";
+import { SlLocationPin } from "react-icons/sl";
+import { HiOutlineMenu } from "react-icons/hi";
+import { TbFileDownload } from "react-icons/tb";
 
 // Experience duration calculator (AUTO updates)
 function calculateExperienceDuration(startDate) {
@@ -162,28 +157,11 @@ const Header = ({ activeSection }) => {
             className="md:hidden text-gray-300 hover:text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+            {isMenuOpen ? (
+              <MdOutlineClear size={24} />
+            ) : (
+              <HiOutlineMenu size={24} />
+            )}
           </button>
         </div>
 
@@ -319,15 +297,11 @@ const Home = () => {
             <div className="relative">
               <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-blue-400/30">
                 <div className="w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center">
-                  {profileImage ? (
-                    <img
-                      src={profileImage}
-                      alt="Profile"
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <MdPerson className="text-8xl" />
-                  )}
+                  <img
+                    src="/profile.jpeg"
+                    alt="Profile"
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </div>
               </div>
               <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-blue-500/10 border border-blue-400/30 animate-pulse"></div>
@@ -343,13 +317,13 @@ const Home = () => {
 // About Component
 const About = () => {
   return (
-    <section id="about" className="py-12">
+    <section id="about" className="py-8">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl font-bold text-center mb-12"
+          className="text-4xl font-bold text-center mb-8"
         >
           About <span className="text-blue-400">Me</span>
         </motion.h2>
@@ -365,7 +339,7 @@ const About = () => {
               <div className="w-75 h-72 rounded-2xl overflow-hidden border-4 border-blue-400/30 mx-auto">
                 <div className="w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center">
                   <img
-                    src={aboutImage}
+                    src="/aboutimage.png"
                     alt="About Me"
                     className="w-full h-full object-cover rounded-2xl"
                   />
@@ -442,19 +416,7 @@ const About = () => {
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors"
             >
               Download CV
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+              <TbFileDownload />
             </motion.a>
           </motion.div>
         </div>
@@ -495,7 +457,7 @@ const Skills = () => {
   ];
 
   return (
-    <section id="skills" className="py-12 bg-gray-800/50">
+    <section id="skills" className="py-8 bg-gray-800/50">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -550,7 +512,7 @@ const Experience = () => {
   ];
 
   return (
-    <section id="experience" className="py-12">
+    <section id="experience" className="py-8">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -571,11 +533,11 @@ const Experience = () => {
               className="relative"
             >
               <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
                     <div>
                       <img
-                        src={ritsLogo}
+                        src="/ritsLogo.png"
                         alt="Revappayya Logo"
                         className="w-16 h-16 mb-4 md:mb-0 rounded"
                       />
@@ -596,26 +558,8 @@ const Experience = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-gray-400 mb-6">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                <div className="flex items-center gap-2 text-gray-400 mb-3">
+                  <SlLocationPin size={18} />
                   <span>{exp.location}</span>
                 </div>
 
@@ -650,7 +594,7 @@ const Projects = () => {
   const projects = [
     {
       title: "RITS Billing Suite",
-      image: ritsBillingSuiteImage,
+      image: "/ritsBillingSuite.png",
       applicationType: "Web and Mobile Application",
       description:
         "A comprehensive billing solution for RITS, featuring automated invoice, quotation and payment processing.",
@@ -667,7 +611,7 @@ const Projects = () => {
     },
     {
       title: "SwapTicket",
-      image: swapTicketImage,
+      image: "/swapticket.png",
       applicationType: "Web Application",
       description:
         "A platform for users to swap tickets for Train, Bus, and Flight tickets with secure transactions.",
@@ -683,7 +627,7 @@ const Projects = () => {
     },
     {
       title: "ShopEase - Ecommerce",
-      image: eCommerceImage,
+      image: "/ECommerce.png",
       applicationType: "Web Application",
       description:
         "A full-featured e-commerce platform with cart functionality, payment integration, and admin dashboard.",
@@ -700,7 +644,7 @@ const Projects = () => {
     },
     {
       title: "Stock Market",
-      image: stockMarketImage,
+      image: "/StockMarket.png",
       applicationType: "Web Application",
       description:
         "Real-time stock market data platform with user authentication and portfolio management features.",
@@ -724,7 +668,7 @@ const Projects = () => {
   };
 
   return (
-    <section id="projects" className="py-12 bg-gray-800/50">
+    <section id="projects" className="py-8 bg-gray-800/50">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12">
           My <span className="text-blue-400">Projects</span>
@@ -739,7 +683,7 @@ const Projects = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -80 }}
               transition={{ duration: 0.5 }}
-              className="bg-gray-900/50 border border-gray-700 rounded-xl overflow-hidden h-[520px] flex flex-col"
+              className="bg-gray-900/50 border border-gray-700 rounded-xl overflow-hidden h-[520px] md:h-full flex flex-col"
             >
               <div className="h-56">
                 <img
@@ -818,6 +762,7 @@ const Projects = () => {
 // Contact Component
 const Contact = () => {
   const [messageSent, setMessageSent] = useState(false);
+  const [error, setError] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -825,8 +770,33 @@ const Contact = () => {
     message: "",
   });
 
+  const validation = () => {
+    let error = {};
+
+    if (!formData.name.trim()) {
+      error.name = "Name is required";
+    }
+
+    if (!formData.email.trim()) {
+      error.email = "Email is required";
+    }
+
+    if (!formData.subject.trim()) {
+      error.subject = "Subject is required";
+    }
+
+    if (!formData.message.trim()) {
+      error.message = "Message is required";
+    }
+
+    setError(error);
+
+    return Object.keys(error).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validation()) return;
     setMessageSent(true);
 
     try {
@@ -869,7 +839,7 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-12">
+    <section id="contact" className="py-8">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -980,9 +950,13 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Your Name"
-                  required
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
+                <div className="h-3">
+                  {error.name && (
+                    <p className="text-red-400 text-sm">{error.name}</p>
+                  )}
+                </div>
               </div>
               <div>
                 <input
@@ -991,9 +965,13 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Your Email"
-                  required
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
+                <div className="h-3">
+                  {error.email && (
+                    <p className="text-red-400 text-sm">{error.email}</p>
+                  )}
+                </div>
               </div>
               <div>
                 <input
@@ -1002,9 +980,13 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Subject"
-                  required
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
+                <div className="h-3">
+                  {error.subject && (
+                    <p className="text-red-400 text-sm">{error.subject}</p>
+                  )}
+                </div>
               </div>
               <div>
                 <textarea
@@ -1013,9 +995,13 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Your Message"
                   rows="4"
-                  required
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors resize-none"
                 />
+                <div className="h-3">
+                  {error.message && (
+                    <p className="text-red-400 text-sm">{error.message}</p>
+                  )}
+                </div>
               </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -1036,30 +1022,16 @@ const Contact = () => {
 // Footer Component
 const Footer = () => {
   return (
-    <footer className="py-8 border-t border-gray-800">
+    <footer className="py-4 border-t border-gray-800">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-400 text-sm">
             © {new Date().getFullYear()} Sanat Buyya. All rights reserved.
           </div>
-          <div className="text-center">
+          <div className="text-center md:mr-4">
             <p className="text-gray-300 mb-2">
               Let's build something amazing together!
             </p>
-          </div>
-          <div className="flex gap-4">
-            <a
-              href="https://www.linkedin.com/in/sanat-buyya-a32b9b282/"
-              className="text-gray-400 hover:text-blue-400 transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://github.com/sanat-buyya"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
           </div>
         </div>
       </div>
