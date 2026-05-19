@@ -607,7 +607,7 @@ const Projects = () => {
         "Tailwind CSS",
         "React Native",
       ],
-      status: "Ongoing",
+      status: "Completed",
     },
     {
       title: "SwapTicket",
