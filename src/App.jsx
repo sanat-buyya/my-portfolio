@@ -263,7 +263,7 @@ const Home = () => {
               <span className="text-blue-400 font-semibold">
                 {calculateExperienceDuration("2024-10-25")}
               </span>{" "}
-              of professional experience at Revappayya IT Services Pvt Ltd.
+              of hands-on experience building real-world web applications and enterprise solutions.
               Specializing in Java, Spring Boot, React, and modern web and
               mobile technologies. Focused on building scalable applications
               with clean code and best practices.
