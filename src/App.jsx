@@ -261,7 +261,7 @@ const Home = () => {
             <p className="text-gray-300 mb-8 max-w-2xl">
               Passionate Software Engineer with{" "}
               <span className="text-blue-400 font-semibold">
-                {calculateExperienceDuration("2025-08-25")}
+                {calculateExperienceDuration("2024-10-25")}
               </span>{" "}
               of professional experience at Revappayya IT Services Pvt Ltd.
               Specializing in Java, Spring Boot, React, and modern web and
@@ -363,9 +363,7 @@ const About = () => {
             <h3 className="text-2xl font-bold mb-6">Who am I?</h3>
             <p className="text-gray-300 mb-4">
               I am a Full Stack Developer with hands-on industry experience,
-              currently working at Revappayya IT Services Pvt. Ltd., where I
-              have been contributing to the development of real-world products
-              for the past {calculateExperienceDuration("2025-08-25")}. One of
+              I previously worked at Revappayya IT Services Pvt. Ltd., where I contributed to the development of real-world products for 1.5+ years. One of
               the products I worked on is successfully live on both the website
               and the Google Play Store, giving me end-to-end exposure to
               production-grade application development. I hold a Bachelor of
@@ -389,7 +387,7 @@ const About = () => {
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Experience:</span>
                   <span className="text-white">
-                    {calculateExperienceDuration("2025-08-25")}
+                    {calculateExperienceDuration("2024-10-25")}
                   </span>
                 </div>
               </div>
@@ -553,7 +551,7 @@ const Experience = () => {
                   </div>
                   <div className="mt-2 md:mt-0">
                     <span className="inline-block px-4 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-semibold">
-                      {calculateExperienceDuration(exp.startDate)}
+                      Oct 2024 - Mar 2026 (1.5 years)
                     </span>
                   </div>
                 </div>
