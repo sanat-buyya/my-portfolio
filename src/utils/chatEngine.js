@@ -52,7 +52,7 @@ function detectProjectSubIntent(normalizedText) {
       "what does it solve",
       "goal",
       "objective",
-      "why"
+      "why",
     ].some((p) => normalizedText.includes(p))
   ) {
     return "purpose";
@@ -69,7 +69,7 @@ function detectProjectSubIntent(normalizedText) {
       "used to build",
       "what language",
       "what framework",
-      "database"
+      "database",
     ].some((p) => normalizedText.includes(p))
   ) {
     return "tech";
@@ -85,19 +85,16 @@ function detectProjectSubIntent(normalizedText) {
       "user roles",
       "seller",
       "buyer",
-      "admin"
+      "admin",
     ].some((p) => normalizedText.includes(p))
   ) {
     return "features";
   }
 
   if (
-    [
-      "payment",
-      "payment gateway",
-      "razorpay",
-      "how payment works"
-    ].some((p) => normalizedText.includes(p))
+    ["payment", "payment gateway", "razorpay", "how payment works"].some((p) =>
+      normalizedText.includes(p),
+    )
   ) {
     return "payment";
   }
@@ -109,31 +106,24 @@ function detectProjectSubIntent(normalizedText) {
       "customer support",
       "real time support",
       "real-time support",
-      "chat support"
+      "chat support",
     ].some((p) => normalizedText.includes(p))
   ) {
     return "support";
   }
 
   if (
-    [
-      "train tracking",
-      "track train",
-      "train status",
-      "train api"
-    ].some((p) => normalizedText.includes(p))
+    ["train tracking", "track train", "train status", "train api"].some((p) =>
+      normalizedText.includes(p),
+    )
   ) {
     return "train-tracking";
   }
 
   if (
-    [
-      "role",
-      "roles",
-      "seller",
-      "buyer",
-      "admin"
-    ].some((p) => normalizedText.includes(p))
+    ["role", "roles", "seller", "buyer", "admin"].some((p) =>
+      normalizedText.includes(p),
+    )
   ) {
     return "roles";
   }
@@ -144,15 +134,15 @@ function detectProjectSubIntent(normalizedText) {
       "responsibilities",
       "my role",
       "sanat role",
-      "what did sanat do"
+      "what did sanat do",
     ].some((p) => normalizedText.includes(p))
   ) {
     return "role";
   }
 
   if (
-    ["link", "url", "demo", "live", "github", "repo", "source code"].some(
-      (p) => normalizedText.includes(p)
+    ["link", "url", "demo", "live", "github", "repo", "source code"].some((p) =>
+      normalizedText.includes(p),
     )
   ) {
     return "links";
@@ -325,12 +315,29 @@ const INTENTS = [
   {
     id: "availability",
     triggers: [
+      "available",
+      "available to work",
+      "available for work",
       "available for a job",
+      "available for jobs",
+      "available for new opportunities",
+      "available to join",
       "is sanat available",
+      "is sanat available to work",
+      "is sanat available for work",
+      "is sanat looking for a job",
+      "is sanat looking for work",
       "looking for a job",
+      "looking for jobs",
+      "looking for work",
+      "looking for opportunities",
       "open to work",
+      "open for work",
+      "open to new opportunities",
+      "open for opportunities",
       "hiring",
-      "why should i hire",
+      "can i hire sanat",
+      "can we hire sanat",
       "hire sanat",
       "available for hire",
       "job ready",
@@ -474,16 +481,16 @@ function buildResponse(intentId) {
       };
 
     case "profile":
-  return {
-    text: `${profile.about} He is currently open to new opportunities and is focused on full-stack development across frontend, backend, and mobile technologies.`,
+      return {
+        text: `${profile.about} He is currently open to new opportunities and is focused on full-stack development across frontend, backend, and mobile technologies.`,
 
-    actions: [
-      {
-        label: "View Projects",
-        scrollTo: sectionIds.projects,
-      },
-    ],
-  };
+        actions: [
+          {
+            label: "View Projects",
+            scrollTo: sectionIds.projects,
+          },
+        ],
+      };
 
     case "skills":
       return {
@@ -507,9 +514,9 @@ function buildResponse(intentId) {
       };
 
     case "react-check":
-  return {
-    text: `Yes — React JS is one of Sanat's core frontend skills, and he has also used React Native for mobile application development. React is used in projects like RITS Billing Suite and in his professional development experience.`,
-  };
+      return {
+        text: `Yes — React JS is one of Sanat's core frontend skills, and he has also used React Native for mobile application development. React is used in projects like RITS Billing Suite and in his professional development experience.`,
+      };
 
     case "springboot-check":
       return {
@@ -581,8 +588,13 @@ function buildResponse(intentId) {
 
     case "availability":
       return {
-        text: `Sanat is currently ${profile.availability}. He has about ${experienceDuration} of full-stack experience with Java, Spring Boot, React, React Native and Deployment, and has shipped production applications end-to-end — feel free to reach out.`,
-        actions: [{ label: "Contact Sanat", scrollTo: sectionIds.contact }],
+        text: `Yes. Sanat is currently ${profile.availability}. He has about ${experienceDuration} of professional software development experience, including full-stack experience with Java, Spring Boot, React, React Native, Node.js, and modern deployment technologies. He is available for new opportunities.`,
+        actions: [
+          {
+            label: "Contact Sanat",
+            scrollTo: sectionIds.contact,
+          },
+        ],
       };
 
     default:
@@ -625,7 +637,6 @@ export function generateReply(rawText) {
   }
 
   return {
-  text:
-    "I couldn't find that information in Sanat's portfolio. I can help with his profile, skills, projects, experience, education, or contact information. Try asking something like \"What technologies were used in SwapTicket?\"",
-};
+    text: "I couldn't find that information in Sanat's portfolio. I can help with his profile, skills, projects, experience, education, or contact information. Try asking something like \"What technologies were used in SwapTicket?\"",
+  };
 }
