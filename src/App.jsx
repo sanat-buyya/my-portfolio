@@ -1,5 +1,5 @@
 // App.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdEmail, MdPhone, MdLocationOn, MdOutlineClear } from "react-icons/md";
 import {
@@ -22,11 +22,22 @@ import {
   SiTailwindcss,
   SiPostman,
   SiMongodb,
+  SiRender,
+  SiVercel,
+  SiGit,
+  SiTypescript,
+  SiNodedotjs,
+  SiJavascript,
+  SiPostgresql,
+  SiNextdotjs,
 } from "react-icons/si";
 import { VscAzure } from "react-icons/vsc";
 import { SlLocationPin } from "react-icons/sl";
 import { HiOutlineMenu } from "react-icons/hi";
-import { TbFileDownload } from "react-icons/tb";
+import { TbFileDownload, TbSql } from "react-icons/tb";
+
+// Lazy-loaded so the floating chat assistant doesn't add to the initial page load.
+const ChatAssistant = lazy(() => import("./components/ChatAssistant"));
 
 // Experience duration calculator (AUTO updates)
 function calculateExperienceDuration(startDate) {
@@ -98,6 +109,9 @@ function App() {
       <Projects />
       <Contact />
       <Footer />
+      <Suspense fallback={null}>
+        <ChatAssistant />
+      </Suspense>
     </div>
   );
 }
@@ -304,9 +318,7 @@ const Home = () => {
                   />
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-blue-500/10 border border-blue-400/30 animate-pulse"></div>
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-purple-500/10 border border-purple-400/30 animate-pulse"></div>
-            </div>
+              </div>
           </motion.div>
         </div>
       </div>
@@ -439,19 +451,26 @@ const Skills = () => {
       ),
       color: "bg-purple-600",
     },
-    { name: "SQL / MySQL", icon: <SiMysql />, color: "bg-blue-600" },
-
-    { name: "JavaScript", icon: <FaJs />, color: "bg-yellow-400 text-black" },
+    
+    { name: "JavaScript", icon: <SiJavascript />, color: "bg-yellow-400 text-black" },
+    { name: "TypeScript", icon: <SiTypescript />, color: "bg-blue-600" },
     { name: "React JS", icon: <FaReact />, color: "bg-cyan-500" },
+    { name: "Next.js", icon: <SiNextdotjs />, color: "bg-gray-800" },
+    { name: "Node.js", icon: <SiNodedotjs />, color: "bg-green-500" },
     { name: "React Native", icon: <FaReact />, color: "bg-blue-500" },
     { name: "Tailwind CSS", icon: <SiTailwindcss />, color: "bg-cyan-600" },
     { name: "HTML5", icon: <FaHtml5 />, color: "bg-orange-600" },
     { name: "CSS3", icon: <FaCss3Alt />, color: "bg-blue-500" },
-
+    { name: "SQL", icon: <TbSql />, color: "bg-blue-600" },
+    { name: "MySQL", icon: <SiMysql />, color: "bg-blue-600" },
+    { name: "PostgreSQL", icon: <SiPostgresql />, color: "bg-blue-600"},
     { name: "MongoDB", icon: <SiMongodb />, color: "bg-green-500" },
     { name: "Postman", icon: <SiPostman />, color: "bg-orange-400" },
     { name: "Azure", icon: <VscAzure />, color: "bg-blue-700" },
     { name: "GitHub", icon: <FaGithub />, color: "bg-gray-800" },
+    { name: "Git", icon: <SiGit />, color: "bg-red-600" },
+    { name: "Vercel", icon: <SiVercel />, color: "bg-black" },
+    { name: "Render", icon: <SiRender />, color: "bg-black" },
   ];
 
   return (
