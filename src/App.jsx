@@ -39,7 +39,7 @@ import { TbFileDownload, TbSql } from "react-icons/tb";
 // Lazy-loaded so the floating chat assistant doesn't add to the initial page load.
 const ChatAssistant = lazy(() => import("./components/ChatAssistant"));
 
-// Experience duration calculator (AUTO updates)
+// Experience duration calculator (AUTO updates) - Returns formatted string
 function calculateExperienceDuration(startDate) {
   const start = new Date(startDate);
   const now = new Date();
@@ -69,6 +69,29 @@ function calculateExperienceDuration(startDate) {
   return `${years} Year${years > 1 ? "s" : ""} ${remainingMonths} Month${
     remainingMonths > 1 ? "s" : ""
   }`;
+}
+
+// Calculate experience as decimal years (e.g., 1.9 for 1 year 9 months)
+function calculateExperienceYears(startDate) {
+  const start = new Date(startDate);
+  const now = new Date();
+
+  let months =
+    (now.getFullYear() - start.getFullYear()) * 12 +
+    (now.getMonth() - start.getMonth());
+
+  // Adjust if current day is before start day
+  if (now.getDate() < start.getDate()) {
+    months--;
+  }
+
+  if (months < 1) return "0.1";
+
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  const decimalYears = (years + remainingMonths / 12).toFixed(1);
+
+  return decimalYears;
 }
 
 function App() {
@@ -306,7 +329,7 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="lg:w-1/2 flex justify-center"
+            className="lg:w-1/2 flex flex-col items-center justify-center"
           >
             <div className="relative">
               <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-blue-400/30">
@@ -318,7 +341,45 @@ const Home = () => {
                   />
                 </div>
               </div>
-              </div>
+            </div>
+
+            {/* Stats Section */}
+            <div className="flex gap-6 mt-8">
+              {/* Years of Experience */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-400/30 rounded-lg p-4 text-center"
+              >
+                <div className="text-3xl font-bold text-blue-400">
+                  {calculateExperienceYears("2024-10-25")}+
+                </div>
+                <div className="text-gray-300 text-sm mt-2">Years of Experience</div>
+              </motion.div>
+
+              {/* Projects Completed */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-400/30 rounded-lg p-4 text-center"
+              >
+                <div className="text-3xl font-bold text-purple-400">5+</div>
+                <div className="text-gray-300 text-sm mt-2">Projects Completed</div>
+              </motion.div>
+
+              {/* Current Position */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-400/30 rounded-lg p-4 text-center"
+              >
+                <div className="text-sm font-semibold text-green-400">Open to Work</div>
+                <div className="text-gray-300 text-sm mt-2">Current Position</div>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
