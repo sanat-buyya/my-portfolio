@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TbRobot, TbSend2, TbTrash, TbX } from "react-icons/tb";
+import { TbSend2, TbSparkles, TbTrash, TbX } from "react-icons/tb";
 import { generateReply, getSuggestedQuestions } from "../utils/chatEngine";
 import { profile } from "../data/portfolioKnowledge";
 
@@ -180,11 +180,7 @@ export default function ChatAssistant() {
         whileTap={{ scale: 0.94 }}
         className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60] flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-900/30 px-4 py-3 sm:px-5 sm:py-3.5 border border-blue-400/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
       >
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-        </span>
-        {isOpen ? <TbX size={20} /> : <TbRobot size={20} />}
+        {isOpen ? <TbX size={20} /> : <TbSparkles size={20} aria-hidden="true" />}
         <span className="hidden sm:inline text-sm font-semibold">{isOpen ? "Close" : "Ask Sanat"}</span>
       </motion.button>
 
@@ -205,7 +201,7 @@ export default function ChatAssistant() {
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-700 bg-gray-900/90">
               <div className="w-9 h-9 rounded-full bg-blue-600/20 border border-blue-400/40 flex items-center justify-center text-blue-400">
-                <TbRobot size={20} />
+                <TbSparkles size={20} aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">Ask Sanat AI</p>
