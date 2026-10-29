@@ -14,6 +14,7 @@ import {
   FaYoutube,
   FaChevronCircleLeft,
   FaChevronCircleRight,
+  FaDatabase,
 } from "react-icons/fa";
 import {
   SiSpring,
@@ -35,78 +36,50 @@ import { VscAzure } from "react-icons/vsc";
 import { SlLocationPin } from "react-icons/sl";
 import { HiOutlineMenu } from "react-icons/hi";
 import { TbFileDownload, TbSql } from "react-icons/tb";
+import {
+  calculateExperienceDuration,
+  calculateExperienceYears,
+  profile,
+  experience,
+  contact,
+} from "./data/portfolioKnowledge";
 
 // Lazy-loaded so the floating chat assistant doesn't add to the initial page load.
 const ChatAssistant = lazy(() => import("./components/ChatAssistant"));
 
-// Experience duration calculator (AUTO updates) - Returns formatted string
-function calculateExperienceDuration(startDate) {
-  const start = new Date(startDate);
-  const now = new Date();
-
-  let months =
-    (now.getFullYear() - start.getFullYear()) * 12 +
-    (now.getMonth() - start.getMonth());
-
-  // Adjust if current day is before start day
-  if (now.getDate() < start.getDate()) {
-    months--;
-  }
-
-  if (months < 1) return "Less than a month";
-
-  if (months < 12) {
-    return `${months} Month${months > 1 ? "s" : ""}`;
-  }
-
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-
-  if (remainingMonths === 0) {
-    return `${years} Year${years > 1 ? "s" : ""}`;
-  }
-
-  return `${years} Year${years > 1 ? "s" : ""} ${remainingMonths} Month${
-    remainingMonths > 1 ? "s" : ""
-  }`;
-}
-
-// Calculate experience as decimal years (e.g., 1.9 for 1 year 9 months)
-function calculateExperienceYears(startDate) {
-  const start = new Date(startDate);
-  const now = new Date();
-
-  let months =
-    (now.getFullYear() - start.getFullYear()) * 12 +
-    (now.getMonth() - start.getMonth());
-
-  // Adjust if current day is before start day
-  if (now.getDate() < start.getDate()) {
-    months--;
-  }
-
-  if (months < 1) return "0.1";
-
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-  const decimalYears = (years + remainingMonths / 12).toFixed(1);
-
-  return decimalYears;
+// "Oct 2024" — UTC so a date-only string never shifts to the previous month.
+function formatMonthYear(date) {
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function App() {
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
+    const sections = [
+      "home",
+      "about",
+      "skills",
+      "experience",
+      "projects",
+      "contact",
+    ];
+
     const handleScroll = () => {
-      const sections = [
-        "home",
-        "about",
-        "skills",
-        "experience",
-        "projects",
-        "contact",
-      ];
+      // The last section may be too short to reach the top of the viewport,
+      // so treat "scrolled to the bottom" as being on it.
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+      if (atBottom) {
+        setActiveSection(sections[sections.length - 1]);
+        return;
+      }
+
       const current = sections.find((section) => {
         const element = document.getElementById(section);
         if (element) {
@@ -118,7 +91,8 @@ function App() {
       if (current) setActiveSection(current);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // page may load already scrolled (e.g. a #projects link)
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -191,8 +165,11 @@ const Header = ({ activeSection }) => {
 
           {/* Mobile Menu Button */}
           <button
+            type="button"
             className="md:hidden text-gray-300 hover:text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? (
               <MdOutlineClear size={24} />
@@ -232,44 +209,34 @@ const Header = ({ activeSection }) => {
 
 // Home Component
 const Home = () => {
-  const texts = [
-    "Full Stack Developer",
-    "Java Developer",
-    "React Developer",
-    "Software Engineer",
-  ];
+  const texts = profile.titles;
 
   const [textIndex, setTextIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Typewriter: each tick does exactly one step, so there's a single pending
+  // timer that the cleanup always clears.
   useEffect(() => {
     const currentText = texts[textIndex];
-    let typingSpeed = isDeleting ? 60 : 120;
+    const isFullyTyped = !isDeleting && displayText === currentText;
+    const delay = isFullyTyped ? 1000 : isDeleting ? 60 : 120; // pause after typing
 
     const timeout = setTimeout(() => {
-      setDisplayText((prev) => {
-        if (!isDeleting) {
-          // Typing
-          const updated = currentText.substring(0, prev.length + 1);
-          if (updated === currentText) {
-            setTimeout(() => setIsDeleting(true), 1000); // pause after typing
-          }
-          return updated;
-        } else {
-          // Deleting
-          const updated = currentText.substring(0, prev.length - 1);
-          if (updated === "") {
-            setIsDeleting(false);
-            setTextIndex((prev) => (prev + 1) % texts.length);
-          }
-          return updated;
-        }
-      });
-    }, typingSpeed);
+      if (isFullyTyped) {
+        setIsDeleting(true);
+      } else if (isDeleting && displayText === "") {
+        setIsDeleting(false);
+        setTextIndex((prev) => (prev + 1) % texts.length);
+      } else {
+        setDisplayText(
+          currentText.substring(0, displayText.length + (isDeleting ? -1 : 1)),
+        );
+      }
+    }, delay);
 
     return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, textIndex]);
+  }, [texts, displayText, isDeleting, textIndex]);
 
   return (
     <section id="home" className="w-full min-h-screen flex items-center pt-12">
@@ -297,8 +264,8 @@ const Home = () => {
             </div>
             <p className="text-gray-300 mb-8 max-w-2xl">
               Passionate Software Engineer with{" "}
-              <span className="text-blue-400 font-semibold">
-                {calculateExperienceDuration("2024-10-25")}
+              <span className="text-blue-400 font-semibold capitalize">
+                {calculateExperienceDuration(profile.experienceStartDate)}
               </span>{" "}
               of hands-on experience building real-world web applications and enterprise solutions.
               Specializing in Java, Spring Boot, React, and modern web and
@@ -353,7 +320,7 @@ const Home = () => {
                 className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-400/30 rounded-lg p-4 text-center"
               >
                 <div className="text-3xl font-bold text-blue-400">
-                  {calculateExperienceYears("2024-10-25")}+
+                  {calculateExperienceYears(profile.experienceStartDate)}+
                 </div>
                 <div className="text-gray-300 text-sm mt-2">Years of Experience</div>
               </motion.div>
@@ -365,7 +332,7 @@ const Home = () => {
                 transition={{ duration: 0.8, delay: 0.5 }}
                 className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-400/30 rounded-lg p-4 text-center"
               >
-                <div className="text-3xl font-bold text-purple-400">5+</div>
+                <div className="text-3xl font-bold text-purple-400">8+</div>
                 <div className="text-gray-300 text-sm mt-2">Projects Completed</div>
               </motion.div>
 
@@ -412,8 +379,10 @@ const About = () => {
               <div className="w-75 h-72 rounded-2xl overflow-hidden border-4 border-blue-400/30 mx-auto">
                 <div className="w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center">
                   <img
-                    src="/aboutimage.png"
-                    alt="About Me"
+                    src="/aboutimage.jpg"
+                    alt="Sanat working at a computer"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover rounded-2xl"
                   />
                 </div>
@@ -435,7 +404,7 @@ const About = () => {
           >
             <h3 className="text-2xl font-bold mb-6">Who am I?</h3>
             <p className="text-gray-300 mb-4">
-              I am a Full Stack Developer with hands-on industry experience,
+              I am a Full Stack Developer with hands-on industry experience.
               I previously worked at Revappayya IT Services Pvt. Ltd., where I contributed to the development of real-world products for 1.5+ years. One of
               the products I worked on is successfully live on both the website
               and the Google Play Store, giving me end-to-end exposure to
@@ -455,23 +424,23 @@ const About = () => {
                 </div>
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Email:</span>
-                  <span className="text-white">sanatbuyya@gmail.com</span>
+                  <span className="text-white">{contact.email}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Experience:</span>
-                  <span className="text-white">
-                    {calculateExperienceDuration("2024-10-25")}
+                  <span className="text-white capitalize">
+                    {calculateExperienceDuration(profile.experienceStartDate)}
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Phone:</span>
-                  <span className="text-white">+91 6363356214</span>
+                  <span className="text-white">{contact.phone}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Location:</span>
-                  <span className="text-white">Bengaluru, Karnataka</span>
+                  <span className="text-white">{contact.location}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Status:</span>
@@ -483,7 +452,8 @@ const About = () => {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="/cv.pdf"
+              href={contact.resume}
+              download="Sanat-Buyya-CV.pdf"
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors"
             >
               Download CV
@@ -502,17 +472,7 @@ const Skills = () => {
     { name: "Java", icon: <FaJava />, color: "bg-red-500" },
     { name: "Spring Boot", icon: <SiSpring />, color: "bg-green-600" },
     { name: "Hibernate", icon: <SiHibernate />, color: "bg-orange-500" },
-    {
-      name: "JDBC",
-      icon: (
-        <img
-          src="https://img.icons8.com/color/48/000000/database.png"
-          alt="JDBC"
-        />
-      ),
-      color: "bg-purple-600",
-    },
-    
+    { name: "JDBC", icon: <FaDatabase />, color: "bg-purple-600" },
     { name: "JavaScript", icon: <SiJavascript />, color: "bg-yellow-400 text-black" },
     { name: "TypeScript", icon: <SiTypescript />, color: "bg-blue-600" },
     { name: "React JS", icon: <FaReact />, color: "bg-cyan-500" },
@@ -568,27 +528,9 @@ const Skills = () => {
   );
 };
 
-// Experience Component
+// Experience Component — entries come from portfolioKnowledge.js, shared with the chat
+// assistant so both always show the same details.
 const Experience = () => {
-  const experiences = [
-    {
-      company: "Revappayya IT Services Pvt Ltd",
-      position: "Full Stack Developer",
-      startDate: "2025-08-25",
-      location: "Bengaluru",
-      description:
-        "Working on full-stack development projects using JavaScript, React, and React Native, Node.js. Contributing to building scalable applications and implementing best practices.",
-      technologies: [
-        "JavaScript",
-        "React JS",
-        "React Native",
-        "Tailwind CSS",
-        "Node.js",
-        "Azure",
-      ],
-    },
-  ];
-
   return (
     <section id="experience" className="py-8">
       <div className="container mx-auto px-4">
@@ -602,9 +544,9 @@ const Experience = () => {
         </motion.h2>
 
         <div className="max-w-3xl mx-auto">
-          {experiences.map((exp, index) => (
+          {experience.map((exp) => (
             <motion.div
-              key={index}
+              key={exp.company}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -615,9 +557,11 @@ const Experience = () => {
                   <div className="flex items-center gap-4">
                     <div>
                       <img
-                        src="/ritsLogo.png"
-                        alt="Revappayya Logo"
-                        className="w-16 h-16 mb-4 md:mb-0 rounded"
+                        src="/ritsLogoMark.png"
+                        alt="Revappayya IT Services logo"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-16 h-16 mb-4 md:mb-0 rounded bg-white"
                       />
                     </div>
                     <div>
@@ -631,7 +575,8 @@ const Experience = () => {
                   </div>
                   <div className="mt-2 md:mt-0">
                     <span className="inline-block px-4 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-semibold">
-                      Oct 2024 - Mar 2026 (1.5 years)
+                      {formatMonthYear(exp.startDate)} -{" "}
+                      {formatMonthYear(exp.endDate)} ({exp.durationLabel})
                     </span>
                   </div>
                 </div>
@@ -668,6 +613,7 @@ const Experience = () => {
 // Projects Component
 const Projects = () => {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const projects = [
     {
@@ -745,6 +691,17 @@ const Projects = () => {
     setCurrent((prev) => (prev - 1 + projects.length) % projects.length);
   };
 
+  // Auto-advance every 5 seconds, looping back to the first project after the
+  // last. Re-runs whenever `current` changes, so an arrow or dot click restarts
+  // the countdown instead of jumping again right away.
+  useEffect(() => {
+    if (isPaused) return undefined;
+    const timer = setTimeout(() => {
+      setCurrent((prev) => (prev + 1) % projects.length);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [current, isPaused, projects.length]);
+
   return (
     <section id="projects" className="py-8 bg-gray-800/50">
       <div className="container mx-auto px-4">
@@ -752,7 +709,13 @@ const Projects = () => {
           My <span className="text-blue-400">Projects</span>
         </h2>
 
-        <div className="relative max-w-3xl mx-auto">
+        {/* Pause while a mouse is over the card so visitors can read it.
+            Mouse only: on touch screens a tap would otherwise pause it for good. */}
+        <div
+          className="relative max-w-3xl mx-auto"
+          onPointerEnter={(e) => e.pointerType === "mouse" && setIsPaused(true)}
+          onPointerLeave={(e) => e.pointerType === "mouse" && setIsPaused(false)}
+        >
           {/* Slide */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -766,18 +729,21 @@ const Projects = () => {
               <div className="h-56">
                 <img
                   src={projects[current].image}
-                  alt={projects[current].title}
+                  alt={`${projects[current].title} screenshot`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <div className="p-6 flex flex-col flex-1">
-                <div className="flex justify-between">
+                {/* items-start: otherwise the badge stretches to the title's height when it wraps */}
+                <div className="flex justify-between items-start gap-3">
                   <h3 className="text-xl font-bold">
                     {projects[current].title}
                   </h3>
 
-                  <span className="px-3 py-1 flex items-center bg-green-600/20 text-green-400 rounded-full text-xs">
+                  <span className="mt-0.5 shrink-0 whitespace-nowrap px-3 py-1 flex items-center bg-green-600/20 text-green-400 rounded-full text-xs">
                     {projects[current].status}
                   </span>
                 </div>
@@ -806,14 +772,18 @@ const Projects = () => {
 
           {/* Navigation Buttons */}
           <button
+            type="button"
             onClick={prevSlide}
+            aria-label="Previous project"
             className="absolute top-1/2 -left-4 md:-left-12 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full hover:bg-gray-700"
           >
             <FaChevronCircleLeft size={25} />
           </button>
 
           <button
+            type="button"
             onClick={nextSlide}
+            aria-label="Next project"
             className="absolute top-1/2 -right-4 md:-right-12 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full hover:bg-gray-700"
           >
             <FaChevronCircleRight size={25} />
@@ -821,10 +791,13 @@ const Projects = () => {
 
           {/* Dots Indicator */}
           <div className="flex justify-center mt-6 gap-3">
-            {projects.map((_, index) => (
+            {projects.map((project, index) => (
               <button
-                key={index}
+                key={project.title}
+                type="button"
                 onClick={() => setCurrent(index)}
+                aria-label={`Show ${project.title}`}
+                aria-current={current === index}
                 className={`h-3 w-3 rounded-full transition-all ${
                   current === index ? "bg-blue-400 scale-125" : "bg-gray-500"
                 }`}
@@ -839,7 +812,8 @@ const Projects = () => {
 
 // Contact Component
 const Contact = () => {
-  const [messageSent, setMessageSent] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [status, setStatus] = useState(null); // { type: "success" | "error", text }
   const [error, setError] = useState({});
   const [formData, setFormData] = useState({
     name: "",
@@ -848,34 +822,42 @@ const Contact = () => {
     message: "",
   });
 
+  const socialLinks = [
+    { label: "LinkedIn", href: contact.linkedin, icon: <FaLinkedinIn className="text-lg" /> },
+    { label: "GitHub", href: contact.github, icon: <FaGithub className="w-5 h-5" /> },
+    { label: "Instagram", href: contact.instagram, icon: <FaInstagram className="w-5 h-5" /> },
+    { label: "YouTube", href: contact.youtube, icon: <FaYoutube className="w-5 h-5" /> },
+  ];
+
   const validation = () => {
-    let error = {};
+    const errors = {};
 
     if (!formData.name.trim()) {
-      error.name = "Name is required";
+      errors.name = "Name is required";
     }
 
     if (!formData.email.trim()) {
-      error.email = "Email is required";
+      errors.email = "Email is required";
     }
 
     if (!formData.subject.trim()) {
-      error.subject = "Subject is required";
+      errors.subject = "Subject is required";
     }
 
     if (!formData.message.trim()) {
-      error.message = "Message is required";
+      errors.message = "Message is required";
     }
 
-    setError(error);
+    setError(errors);
 
-    return Object.keys(error).length === 0;
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validation()) return;
-    setMessageSent(true);
+    if (isSending || !validation()) return;
+    setIsSending(true);
+    setStatus(null);
 
     try {
       const response = await fetch("https://formspree.io/f/xjkweeby", {
@@ -884,36 +866,44 @@ const Contact = () => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        // Formspree uses `_subject` as the notification email's subject line.
+        body: JSON.stringify({
+          ...formData,
+          _subject: `Portfolio contact: ${formData.subject}`,
+        }),
       });
 
-      if (response.ok) {
-        alert("Message sent successfully!");
-        setMessageSent(false);
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: "",
-        });
-      } else {
+      if (!response.ok) {
         throw new Error("Form submission failed");
       }
+
+      setStatus({ type: "success", text: "Thanks! Your message has been sent." });
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
     } catch (error) {
       console.error("Error:", error);
-      alert(
-        "There was a problem sending your message. Please try again later.",
-      );
+      setStatus({
+        type: "error",
+        text: `There was a problem sending your message. Please try again later or email ${contact.email}.`,
+      });
     } finally {
-      setMessageSent(false);
+      setIsSending(false);
     }
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    if (error[name]) {
+      setError({ ...error, [name]: undefined });
+    }
   };
 
   return (
@@ -942,10 +932,10 @@ const Contact = () => {
                 <div>
                   <h3 className="font-semibold text-lg">Email</h3>
                   <a
-                    href="mailto:sanatbuyya@gmail.com"
+                    href={contact.emailHref}
                     className="text-gray-300 hover:text-blue-400 hover:underline transition"
                   >
-                    sanatbuyya@gmail.com
+                    {contact.email}
                   </a>
                 </div>
               </div>
@@ -957,10 +947,10 @@ const Contact = () => {
                 <div>
                   <h3 className="font-semibold text-lg">Phone</h3>
                   <a
-                    href="tel:+916363356214"
+                    href={contact.phoneHref}
                     className="text-gray-300 hover:text-blue-400 transition"
                   >
-                    +91 6363356214
+                    {contact.phone}
                   </a>
                 </div>
               </div>
@@ -971,45 +961,26 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Location</h3>
-                  <p className="text-gray-300">Bengaluru, Karnataka</p>
+                  <p className="text-gray-300">{contact.location}</p>
                 </div>
               </div>
 
               <div className="pt-8">
                 <h3 className="font-semibold text-lg mb-4">Connect with me</h3>
                 <div className="flex gap-4">
-                  <a
-                    href="https://www.linkedin.com/in/sanat-buyya-a32b9b282/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
-                  >
-                    <FaLinkedinIn className="text-lg" />
-                  </a>
-                  <a
-                    href="https://github.com/sanat-buyya"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
-                  >
-                    <FaGithub className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://instagram.com/sanat_buyya"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
-                  >
-                    <FaInstagram className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://www.youtube.com/channel/UCGxNgzjDA1yISEITXJYBUaw"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
-                  >
-                    <FaYoutube className="w-5 h-5" />
-                  </a>
+                  {socialLinks.map((link) => (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.label}
+                      title={link.label}
+                      className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-colors"
+                    >
+                      {link.icon}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1081,14 +1052,22 @@ const Contact = () => {
                   )}
                 </div>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              {/* No scale effect: the button is full-width, so scaling would push it past the form edges. */}
+              <button
                 type="submit"
-                className="w-full px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors"
+                disabled={isSending}
+                className="w-full px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {messageSent ? "Sending..." : "Send Message"}
-              </motion.button>
+                {isSending ? "Sending..." : "Send Message"}
+              </button>
+              <p
+                role="status"
+                className={`text-sm text-center min-h-5 ${
+                  status?.type === "error" ? "text-red-400" : "text-green-400"
+                }`}
+              >
+                {status?.text}
+              </p>
             </form>
           </motion.div>
         </div>

@@ -8,7 +8,7 @@
 
 // Kept in one place so both App.jsx and the chat assistant compute the
 // same "years of experience" text without duplicating logic.
-export function calculateExperienceDuration(startDate) {
+function monthsSince(startDate) {
   const start = new Date(startDate);
   const now = new Date();
 
@@ -19,6 +19,13 @@ export function calculateExperienceDuration(startDate) {
   if (now.getDate() < start.getDate()) {
     months--;
   }
+
+  return months;
+}
+
+// e.g. "1 year 9 months"
+export function calculateExperienceDuration(startDate) {
+  const months = monthsSince(startDate);
 
   if (months < 1) return "less than a month";
   if (months < 12) return `${months} month${months > 1 ? "s" : ""}`;
@@ -31,6 +38,20 @@ export function calculateExperienceDuration(startDate) {
     remainingMonths > 1 ? "s" : ""
   }`;
 }
+
+// Decimal years for the "X+ Years of Experience" stat, e.g. "1.9" or "2".
+// Rounded down so the "+" never overstates.
+export function calculateExperienceYears(startDate) {
+  const months = monthsSince(startDate);
+
+  if (months < 1) return "0.1";
+
+  const years = Math.floor((months / 12) * 10) / 10;
+  return Number.isInteger(years) ? String(years) : years.toFixed(1);
+}
+
+const EXPERIENCE_START_DATE = "2024-10-25";
+const totalExperience = calculateExperienceDuration(EXPERIENCE_START_DATE);
 
 export const profile = {
   name: "Sanat Buyya",
@@ -48,13 +69,12 @@ export const profile = {
 
   availability: "Open to work / available for new opportunities",
 
-  summary:
-    "Passionate Software Engineer with around 1 year 9 months of professional experience in software development, including approximately 1.5 years at Revappayya IT Services Pvt. Ltd. and additional experience working on client projects. Specializes in Java, Spring Boot, React, React Native, Node.js, and modern web and mobile technologies.",
+  summary: `Passionate Software Engineer with around ${totalExperience} of professional experience in software development, including approximately 1.5 years at Revappayya IT Services Pvt. Ltd. and additional experience working on client projects. Specializes in Java, Spring Boot, React, React Native, Node.js, and modern web and mobile technologies.`,
 
-  about:
-    "Sanat is a Full Stack Developer with around 1 year 9 months of professional software development experience. He worked for approximately 1.5 years at Revappayya IT Services Pvt. Ltd., contributing to real-world web and mobile applications. He also has additional experience working on client projects, gaining practical exposure to full-stack development and production-oriented application development.",
+  about: `Sanat is a Full Stack Developer with around ${totalExperience} of professional software development experience. He worked for approximately 1.5 years at Revappayya IT Services Pvt. Ltd., contributing to real-world web and mobile applications. He also has additional experience working on client projects, gaining practical exposure to full-stack development and production-oriented application development.`,
 
-  totalExperience: "1 year 9 months",
+  // Auto-updates from experienceStartDate so the chat matches the site.
+  totalExperience,
 
   companyExperience: "Approximately 1.5 years",
 
@@ -67,7 +87,7 @@ export const profile = {
   previousEmployment:
     "Previously worked as a Full Stack Developer at Revappayya IT Services Pvt. Ltd.",
 
-  experienceStartDate: "2024-10-25",
+  experienceStartDate: EXPERIENCE_START_DATE,
 };
 
 export const education = {
@@ -110,7 +130,7 @@ export const experience = [
     startDate: "2024-10-25",
     endDate: "2026-03-31",
 
-    durationLabel: "Approximately 1.5 years",
+    durationLabel: "1.5 years",
 
     employmentStatus: "Previous employment",
 
@@ -160,7 +180,12 @@ export const projects = [
     "train ticket",
     "bus ticket",
     "flight ticket",
-    "ticket marketplace"
+    "ticket marketplace",
+    "ticket",
+    "train tracking",
+    "track train",
+    "customer support",
+    "websocket"
   ],
 
   title: "SwapTicket",

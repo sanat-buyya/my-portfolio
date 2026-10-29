@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TbRobot, TbSend2, TbX } from "react-icons/tb";
+import { TbRobot, TbSend2, TbTrash, TbX } from "react-icons/tb";
 import { generateReply, getSuggestedQuestions } from "../utils/chatEngine";
 import { profile } from "../data/portfolioKnowledge";
 
@@ -29,12 +29,14 @@ function createMessage(role, content, actions) {
   };
 }
 
+// sessionStorage (not localStorage) so a returning visitor starts fresh
+// instead of seeing answers generated from older portfolio data.
 function loadStoredMessages() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
+    const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
   } catch {
-    // localStorage may be unavailable (privacy mode, quota, etc.) — fail soft.
+    // Storage may be unavailable (privacy mode, quota, etc.) — fail soft.
     return [];
   }
 }
@@ -52,10 +54,10 @@ export default function ChatAssistant() {
   const typingIntervalRef = useRef(null);
   const thinkTimeoutRef = useRef(null);
 
-  // Persist conversation for the session (also survives reloads via localStorage).
+  // Persist conversation for the browser session (survives reloads).
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
     } catch {
       /* ignore storage errors */
     }
@@ -133,6 +135,15 @@ export default function ChatAssistant() {
     [isThinking, streamingText, streamReply],
   );
 
+  const handleClear = () => {
+    clearInterval(typingIntervalRef.current);
+    clearTimeout(thinkTimeoutRef.current);
+    setIsThinking(false);
+    setStreamingText(null);
+    setMessages([]);
+    inputRef.current?.focus();
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -200,6 +211,17 @@ export default function ChatAssistant() {
                 <p className="text-sm font-semibold text-white truncate">Ask Sanat AI</p>
                 <p className="text-xs text-gray-400 truncate">Portfolio assistant · {profile.name}</p>
               </div>
+              {(messages.length > 0 || isBusy) && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  aria-label="Clear conversation"
+                  title="Clear conversation"
+                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                >
+                  <TbTrash size={18} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}

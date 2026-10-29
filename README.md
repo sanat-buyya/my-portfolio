@@ -1,16 +1,43 @@
-# React + Vite
+# Sanat Buyya — Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal portfolio of Sanat Buyya, Full Stack Developer (Java, Spring Boot, React, React Native, Node.js).
 
-Currently, two official plugins are available:
+**Live:** https://sanatbuyya.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Single-page portfolio: Home, About, Skills, Experience, Projects, and Contact sections
+- Experience duration updates automatically from the start date
+- Contact form backed by [Formspree](https://formspree.io/)
+- **Ask Sanat AI**: a floating chat assistant that answers questions about skills, projects, experience, and contact details. It runs entirely in the browser; there are no API calls or keys.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+React 19 · Vite 7 · Tailwind CSS 3 · Framer Motion · React Icons · deployed on Vercel
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting started
+
+```bash
+npm install
+npm run dev      # start the dev server at http://localhost:5173
+npm run build    # production build into dist/
+npm run preview  # serve the production build locally
+npm run lint     # ESLint
+```
+
+## Project structure
+
+```
+public/                       images, profile photo, cv.pdf
+src/
+  App.jsx                     all page sections
+  components/ChatAssistant.jsx  chat widget UI
+  data/portfolioKnowledge.js  profile, experience, projects, contact (shared data)
+  utils/chatEngine.js         matches questions to answers from the shared data
+```
+
+## Updating content
+
+- **Experience, contact details, job titles:** edit `src/data/portfolioKnowledge.js`. The page and the chat assistant both read from it.
+- **Projects and skills shown on the page:** edit the lists in `src/App.jsx`, and update the matching entries in `portfolioKnowledge.js` so the chat assistant stays in sync.
+- **Resume:** replace `public/cv.pdf`.

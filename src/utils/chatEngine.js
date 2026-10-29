@@ -7,7 +7,6 @@ import {
   projects,
   contact,
   sectionIds,
-  calculateExperienceDuration,
 } from "../data/portfolioKnowledge";
 
 export function normalize(text) {
@@ -40,115 +39,158 @@ export function detectProject(normalizedText) {
   return null;
 }
 
-function detectProjectSubIntent(normalizedText) {
-  if (
-    [
-      "purpose",
-      "problem",
-      "problem statement",
-      "what problem",
-      "what issue",
-      "why was it built",
-      "what does it solve",
-      "goal",
-      "objective",
-      "why",
-    ].some((p) => normalizedText.includes(p))
-  ) {
-    return "purpose";
-  }
-
-  if (
-    [
-      "technology",
-      "technologies",
+// Checked in order and the first match wins, so specific topics ("Sanat's
+// role", "payment") come before broad ones ("features", "purpose").
+// Matching is by substring so plurals and verb forms ("purchasing") still hit.
+const PROJECT_SUB_INTENTS = [
+  {
+    id: "role",
+    triggers: [
+      "responsibilit",
+      "sanats role",
+      "his role",
+      "my role",
+      "role did",
+      "contribut",
+      "what did sanat do",
+      "what did he do",
+    ],
+  },
+  { id: "payment", triggers: ["payment", "razorpay", "gateway", "checkout"] },
+  {
+    id: "trainTracking",
+    triggers: [
+      "train tracking",
+      "track train",
+      "track a train",
+      "train status",
+      "train api",
+    ],
+  },
+  { id: "support", triggers: ["support", "websocket", "web socket"] },
+  { id: "admin", triggers: ["admin"] },
+  {
+    id: "seller",
+    triggers: ["seller", "sell", "list a ticket", "list tickets", "listing"],
+  },
+  { id: "buyer", triggers: ["buyer", "buy", "purchas"] },
+  {
+    id: "roles",
+    triggers: ["role", "user types", "types of users", "who can use"],
+  },
+  {
+    id: "type",
+    triggers: [
+      "web or mobile",
+      "mobile or web",
+      "mobile",
+      "type of app",
+      "kind of app",
+    ],
+  },
+  { id: "database", triggers: ["database"] },
+  { id: "backend", triggers: ["backend", "back end", "server side"] },
+  { id: "frontend", triggers: ["frontend", "front end", "user interface"] },
+  {
+    id: "tech",
+    triggers: [
+      "technolog",
       "tech stack",
       "stack",
       "built with",
       "built using",
       "used to build",
-      "what language",
-      "what framework",
-      "database",
-    ].some((p) => normalizedText.includes(p))
-  ) {
-    return "tech";
-  }
-
-  if (
-    [
+      "language",
+      "framework",
+      "tools",
+    ],
+  },
+  {
+    id: "features",
+    triggers: [
       "feature",
-      "features",
-      "functionality",
+      "functionalit",
       "what does it do",
+      "what can it do",
+      "capabilit",
+      "modules",
       "used for",
-      "user roles",
-      "seller",
-      "buyer",
-      "admin",
-    ].some((p) => normalizedText.includes(p))
-  ) {
-    return "features";
-  }
+    ],
+  },
+  {
+    id: "purpose",
+    triggers: ["purpose", "problem", "solve", "why", "goal", "objective"],
+  },
+  {
+    id: "status",
+    triggers: ["status", "completed", "finished", "ongoing", "in progress"],
+  },
+  {
+    id: "links",
+    triggers: [
+      "link",
+      "url",
+      "demo",
+      "live",
+      "github",
+      "repo",
+      "source code",
+      "website",
+    ],
+  },
+];
 
-  if (
-    ["payment", "payment gateway", "razorpay", "how payment works"].some((p) =>
-      normalizedText.includes(p),
-    )
-  ) {
-    return "payment";
-  }
+// Project-specific topics, mapped to the project field that answers them.
+const PROJECT_TOPIC_FIELDS = {
+  payment: "payment",
+  trainTracking: "trainTracking",
+  support: "customerSupport",
+  admin: "adminPanel",
+  seller: "sellerFeatures",
+  buyer: "buyerFeatures",
+};
 
-  if (
-    [
-      "websocket",
-      "web socket",
-      "customer support",
-      "real time support",
-      "real-time support",
-      "chat support",
-    ].some((p) => normalizedText.includes(p))
-  ) {
-    return "support";
-  }
-
-  if (
-    ["train tracking", "track train", "train status", "train api"].some((p) =>
-      normalizedText.includes(p),
-    )
-  ) {
-    return "train-tracking";
-  }
-
-  if (
-    ["role", "roles", "seller", "buyer", "admin"].some((p) =>
-      normalizedText.includes(p),
-    )
-  ) {
+function detectProjectSubIntent(normalizedText) {
+  // "What can buyers and sellers do?" is really a question about user roles.
+  if (normalizedText.includes("sell") && normalizedText.includes("buy")) {
     return "roles";
   }
 
-  if (
-    [
-      "responsibility",
-      "responsibilities",
-      "my role",
-      "sanat role",
-      "what did sanat do",
-    ].some((p) => normalizedText.includes(p))
-  ) {
-    return "role";
-  }
+  const match = PROJECT_SUB_INTENTS.find(({ triggers }) =>
+    triggers.some((t) => normalizedText.includes(t)),
+  );
+  return match ? match.id : "overview";
+}
 
-  if (
-    ["link", "url", "demo", "live", "github", "repo", "source code"].some((p) =>
-      normalizedText.includes(p),
+// ---------- skill detection ----------
+
+// Each skill matches on its normalized name, the name without spaces
+// ("nodejs"), and the name without a version suffix ("html" for HTML5).
+const SKILL_MATCHERS = allSkillsFlat.map((skill) => {
+  const name = normalize(skill);
+  const variants = new Set([
+    name,
+    name.replace(/ /g, ""),
+    name.replace(/\d+$/, "").trim(),
+  ]);
+  return { skill, variants: [...variants].filter((v) => v.length > 1) };
+});
+
+function matchesSkill(normalizedText, matcher) {
+  return matcher.variants.some((v) => includesWord(normalizedText, v));
+}
+
+function detectSkills(normalizedText) {
+  const found = SKILL_MATCHERS.filter((m) => matchesSkill(normalizedText, m));
+  // Drop skills that only matched as part of a longer one ("css" in "tailwind css").
+  return found
+    .filter(
+      (m) =>
+        !found.some(
+          (other) => other !== m && matchesSkill(normalize(other.skill), m),
+        ),
     )
-  ) {
-    return "links";
-  }
-
-  return "overview";
+    .map((m) => m.skill);
 }
 
 // ---------- intents ----------
@@ -392,83 +434,267 @@ function scoreIntents(normalizedText) {
 
 // ---------- response builders ----------
 
-function listify(items) {
-  return items.join(", ");
+const listFormatters = {
+  and: new Intl.ListFormat("en", { style: "long", type: "conjunction" }),
+  or: new Intl.ListFormat("en", { style: "long", type: "disjunction" }),
+};
+
+function listify(items, joiner = "and") {
+  return listFormatters[joiner].format(items);
 }
 
-function projectOverview(project, subIntent) {
-  const purposeText = project.purpose || project.description;
-  const problemText = project.problemStatement || project.description;
-  const rolesText = project.userRoles?.length
-    ? project.userRoles.join(", ")
-    : "multiple user roles";
-  const featureSummary = project.technicalFeatures?.length
-    ? project.technicalFeatures.slice(0, 5).join(", ")
-    : project.technologies?.slice(0, 5).join(", ");
+function bullets(items) {
+  return items.map((item) => `• ${item}`).join("\n");
+}
 
-  if (subIntent === "purpose") {
-    return {
-      text: `${project.title} is a ${project.applicationType.toLowerCase()} built to ${purposeText.toLowerCase()}. The core problem it solves is: ${problemText}.`,
-    };
-  }
+// Ends text with exactly one sentence terminator.
+function sentence(text) {
+  const trimmed = text.trim();
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
 
-  if (subIntent === "tech") {
-    return {
-      text: `${project.title} was built with: ${listify(project.technologies || [])}.`,
-    };
-  }
+function lowerFirst(text) {
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
 
-  if (subIntent === "features") {
-    const sellerFeatures = project.sellerFeatures?.length
-      ? project.sellerFeatures.slice(0, 3).join(", ")
-      : "seller workflows";
-    const buyerFeatures = project.buyerFeatures?.length
-      ? project.buyerFeatures.slice(0, 3).join(", ")
-      : "buyer workflows";
-    const adminText = project.adminPanel?.available
-      ? "an admin panel for monitoring users and transactions"
-      : "limited admin controls";
+// Project data is written as "The application provides ..."; name the
+// project instead when that sentence opens a reply.
+function openingSentence(project, text) {
+  return sentence(text.replace(/^The application\b/, project.title));
+}
 
-    return {
-      text: `${project.title} supports ${rolesText}. Sellers can ${sellerFeatures}, while buyers can ${buyerFeatures}. It also includes ${adminText}. Key technical capabilities: ${featureSummary}.`,
-    };
-  }
+const viewProjectsAction = { label: "View Projects", scrollTo: sectionIds.projects };
+const viewSkillsAction = { label: "View Skills", scrollTo: sectionIds.skills };
+const contactSanatAction = { label: "Contact Sanat", scrollTo: sectionIds.contact };
 
-  if (subIntent === "links") {
-    if (!project.liveUrl && !project.githubUrl) {
-      return {
-        text: `Sanat hasn't published a public live demo or repo link for ${project.title} on the portfolio yet. You can ask him directly via the contact section, or check his GitHub for related work.`,
-        actions: [
-          { label: "View GitHub", href: contact.github, external: true },
-        ],
-      };
-    }
-    const actions = [];
-    if (project.liveUrl)
-      actions.push({
-        label: "Live Demo",
-        href: project.liveUrl,
-        external: true,
-      });
-    if (project.githubUrl)
-      actions.push({
-        label: "View Code",
-        href: project.githubUrl,
-        external: true,
-      });
-    return { text: `Here's where you can see ${project.title}:`, actions };
-  }
+function projectSummary(project) {
+  const intro = project.description.startsWith(project.title)
+    ? sentence(project.description)
+    : `${project.title} (${project.applicationType}): ${sentence(project.description)}`;
+  return `${intro} Built with ${listify(project.technologies)}.`;
+}
 
+// Only offer follow-up topics the project's data can actually answer.
+function followUpHint(project) {
+  const topics = [
+    project.highlights && "its features",
+    project.payment && "payments",
+    project.trainTracking?.available && "train tracking",
+    project.customerSupport?.available && "customer support",
+    project.myRole && "Sanat's role",
+  ].filter(Boolean);
+  return topics.length ? `\n\nYou can also ask about ${listify(topics, "or")}.` : "";
+}
+
+// When a project's portfolio entry doesn't cover the question, say so
+// instead of guessing, and share what the portfolio does say.
+function notCovered(project, topic) {
   return {
-    text: `${project.title} (${project.applicationType}) — ${purposeText}. It solves: ${problemText}. Users include ${rolesText}. Built with ${listify(project.technologies || [])}. Status: ${project.status}.`,
+    text: `The portfolio doesn't include details about ${topic} for ${project.title}. Here's what it does cover: ${projectSummary(project)}`,
+    actions: [contactSanatAction],
   };
 }
 
-function buildResponse(intentId) {
-  const experienceDuration = calculateExperienceDuration(
-    profile.experienceStartDate,
-  );
+const TECH_CATEGORY_LABELS = {
+  frontend: "Frontend",
+  backend: "Backend",
+  database: "Database",
+  payment: "Payments",
+  cloudStorage: "Media storage",
+  realtime: "Real-time",
+  externalApis: "External APIs",
+};
 
+function projectTechReply(project) {
+  const categories = project.technologyCategories;
+  if (!categories) {
+    return { text: `${project.title} was built with ${listify(project.technologies)}.` };
+  }
+  const lines = Object.entries(categories).map(
+    ([key, items]) => `${TECH_CATEGORY_LABELS[key] || key}: ${listify(items)}`,
+  );
+  return { text: `${project.title}'s tech stack:\n${bullets(lines)}` };
+}
+
+function projectReply(project, subIntent, normalizedText) {
+  const { title } = project;
+
+  switch (subIntent) {
+    case "role":
+      if (!project.myRole) return notCovered(project, "Sanat's specific role");
+      return {
+        text: `In ${title}, Sanat ${sentence(lowerFirst(project.myRole))}\n\nKey responsibilities:\n${bullets(project.responsibilities)}`,
+      };
+
+    case "payment":
+      if (!project.payment) return notCovered(project, "the payment flow");
+      return {
+        text: [
+          openingSentence(project, project.payment),
+          project.transactionDescription && sentence(project.transactionDescription),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      };
+
+    case "trainTracking":
+      if (!project.trainTracking?.available) {
+        return notCovered(project, "train tracking");
+      }
+      return {
+        text: `${openingSentence(project, project.trainTracking.description)}\n\n${bullets(project.trainTracking.features)}`,
+      };
+
+    case "support":
+      if (!project.customerSupport?.available) {
+        return notCovered(project, "customer support");
+      }
+      return {
+        text: `${openingSentence(project, project.customerSupport.description)}\n\n${bullets(project.customerSupport.features)}`,
+      };
+
+    case "admin":
+      if (!project.adminPanel?.available) {
+        return notCovered(project, "the admin panel");
+      }
+      return {
+        text: `${title} includes an admin panel. ${sentence(project.adminPanel.description)}\n\n${bullets(project.adminPanel.features)}`,
+      };
+
+    case "seller":
+      if (!project.sellerFeatures) return notCovered(project, "seller features");
+      return {
+        text: `In ${title}, ${sentence(lowerFirst(project.sellerDescription))}\n\nSellers can:\n${bullets(project.sellerFeatures)}`,
+      };
+
+    case "buyer":
+      if (!project.buyerFeatures) return notCovered(project, "buyer features");
+      return {
+        text: `In ${title}, ${sentence(lowerFirst(project.buyerDescription))}\n\nBuyers can:\n${bullets(project.buyerFeatures)}`,
+      };
+
+    case "roles":
+      if (!project.userRoles?.length) return notCovered(project, "user roles");
+      return {
+        text: [
+          `${title} has ${listify(project.userRoles)} roles.`,
+          project.roleBasedAccess,
+          project.sellerDescription,
+          project.buyerDescription,
+          project.adminPanel?.description,
+        ]
+          .filter(Boolean)
+          .map(sentence)
+          .join(" "),
+      };
+
+    case "type":
+      return {
+        text: `${title} is a ${project.applicationType.toLowerCase()}.`,
+      };
+
+    case "database":
+    case "backend":
+    case "frontend": {
+      const layer = project[subIntent];
+      if (!layer?.technologies) return projectTechReply(project);
+      return {
+        text: `${title}'s ${subIntent} uses ${listify(layer.technologies)}. ${sentence(layer.description)}`,
+      };
+    }
+
+    case "tech":
+      return projectTechReply(project);
+
+    case "features": {
+      const wantsTechnical = normalizedText.includes("technical");
+      const list =
+        (wantsTechnical && project.technicalFeatures) || project.highlights;
+      if (!list) {
+        return {
+          text: `${projectSummary(project)} The portfolio doesn't list a more detailed feature breakdown.`,
+        };
+      }
+      return {
+        text: `${title}'s main ${wantsTechnical ? "technical " : ""}features:\n${bullets(list)}`,
+      };
+    }
+
+    case "purpose":
+      if (!project.purpose) return { text: projectSummary(project) };
+      return {
+        text: [project.purpose, project.problemStatement]
+          .filter(Boolean)
+          .map(sentence)
+          .join(" "),
+      };
+
+    case "status":
+      return { text: `${title} is ${project.status.toLowerCase()}.` };
+
+    case "links": {
+      if (!project.liveUrl && !project.githubUrl) {
+        return {
+          text: `Sanat hasn't published a public live demo or repo link for ${title} on the portfolio yet. You can ask him directly via the contact section, or check his GitHub for related work.`,
+          actions: [
+            { label: "View GitHub", href: contact.github, external: true },
+          ],
+        };
+      }
+      const actions = [];
+      if (project.liveUrl)
+        actions.push({
+          label: "Live Demo",
+          href: project.liveUrl,
+          external: true,
+        });
+      if (project.githubUrl)
+        actions.push({
+          label: "View Code",
+          href: project.githubUrl,
+          external: true,
+        });
+      return { text: `Here's where you can see ${title}:`, actions };
+    }
+
+    default:
+      return {
+        text: `${projectSummary(project)} Status: ${project.status}.${followUpHint(project)}`,
+        actions: [viewProjectsAction],
+      };
+  }
+}
+
+const SKILL_CATEGORY_LABELS = {
+  frontend: "frontend skills",
+  backend: "backend skills",
+  database: "database skills",
+  toolsAndPlatforms: "everyday tools and platforms",
+};
+
+function skillReply(found) {
+  if (found.length > 1) {
+    return {
+      text: `Yes — Sanat's skills include ${listify(found)}.`,
+      actions: [viewSkillsAction],
+    };
+  }
+
+  const [skill] = found;
+  const category = Object.keys(skills).find((key) =>
+    skills[key].includes(skill),
+  );
+  const matcher = SKILL_MATCHERS.find((m) => m.skill === skill);
+  const usedIn = projects
+    .filter((p) => p.technologies.some((t) => matchesSkill(normalize(t), matcher)))
+    .map((p) => p.title);
+
+  let text = `Yes — ${skill} is one of Sanat's ${SKILL_CATEGORY_LABELS[category]}.`;
+  if (usedIn.length) text += ` He used it in ${listify(usedIn)}.`;
+  return { text, actions: [viewSkillsAction] };
+}
+
+function buildResponse(intentId) {
   switch (intentId) {
     case "greeting":
       return {
@@ -484,18 +710,13 @@ function buildResponse(intentId) {
       return {
         text: `${profile.about} He is currently open to new opportunities and is focused on full-stack development across frontend, backend, and mobile technologies.`,
 
-        actions: [
-          {
-            label: "View Projects",
-            scrollTo: sectionIds.projects,
-          },
-        ],
+        actions: [viewProjectsAction],
       };
 
     case "skills":
       return {
         text: `Sanat's core technical skills include: ${listify(allSkillsFlat)}.`,
-        actions: [{ label: "View Skills", scrollTo: sectionIds.skills }],
+        actions: [viewSkillsAction],
       };
 
     case "frontend":
@@ -528,14 +749,14 @@ function buildResponse(intentId) {
         text: `Sanat has built ${projects.length} projects shown on the portfolio: ${listify(
           projects.map((p) => p.title),
         )}. Ask me about any one of them for details, e.g. "Tell me about SwapTicket."`,
-        actions: [{ label: "View Projects", scrollTo: sectionIds.projects }],
+        actions: [viewProjectsAction],
       };
 
     case "experience": {
       const exp = experience[0];
 
       return {
-        text: `Sanat has approximately ${profile.totalExperience} of professional software development experience. He has around ${profile.companyExperience} of experience at ${exp.company}, where he worked as a ${exp.position}. In addition, he has experience working on client projects. His experience includes ${listify(exp.technologies)}, along with Java, Spring Boot, MySQL, MongoDB, and other full-stack technologies. Sanat is currently open to new opportunities.`,
+        text: `Sanat has approximately ${profile.totalExperience} of professional software development experience. He spent ${profile.companyExperience.toLowerCase()} at ${exp.company} as a ${exp.position}, and has also worked on client projects. His experience includes ${listify(exp.technologies)}, along with Java, Spring Boot, MySQL, MongoDB, and other full-stack technologies. Sanat is currently open to new opportunities.`,
 
         actions: [
           {
@@ -553,9 +774,9 @@ function buildResponse(intentId) {
 
     case "contact":
       return {
-        text: `You can reach Sanat by email at ${contact.email}, or connect on LinkedIn and GitHub below.`,
+        text: `You can reach Sanat by email at ${contact.email} or by phone at ${contact.phone}. You can also connect with him on LinkedIn and GitHub, or download his resume below.`,
         actions: [
-          { label: "Email Sanat", href: contact.emailHref, external: true },
+          { label: "Email Sanat", href: contact.emailHref },
           { label: "LinkedIn", href: contact.linkedin, external: true },
           { label: "GitHub", href: contact.github, external: true },
           { label: "Download Resume", href: contact.resume, external: true },
@@ -588,13 +809,8 @@ function buildResponse(intentId) {
 
     case "availability":
       return {
-        text: `Yes. Sanat is currently ${profile.availability}. He has about ${experienceDuration} of professional software development experience, including full-stack experience with Java, Spring Boot, React, React Native, Node.js, and modern deployment technologies. He is available for new opportunities.`,
-        actions: [
-          {
-            label: "Contact Sanat",
-            scrollTo: sectionIds.contact,
-          },
-        ],
+        text: `Yes — Sanat is currently open to work and available for new opportunities. He has about ${profile.totalExperience} of professional software development experience, including full-stack work with Java, Spring Boot, React, React Native, Node.js, and modern deployment platforms.`,
+        actions: [contactSanatAction],
       };
 
     default:
@@ -627,13 +843,26 @@ export function generateReply(rawText) {
   const project = detectProject(normalizedText);
   if (project) {
     const subIntent = detectProjectSubIntent(normalizedText);
-    return projectOverview(project, subIntent);
+    return projectReply(project, subIntent, normalizedText);
   }
 
   const intentId = scoreIntents(normalizedText);
   if (intentId) {
     const response = buildResponse(intentId);
     if (response) return response;
+  }
+
+  // "Does he know Java?" — any listed skill that no intent above covers.
+  const skillsMentioned = detectSkills(normalizedText);
+  if (skillsMentioned.length) return skillReply(skillsMentioned);
+
+  // "How does payment work?" without naming a project: answer for the one
+  // project whose data covers that topic, if there's exactly one.
+  const subIntent = detectProjectSubIntent(normalizedText);
+  const field = PROJECT_TOPIC_FIELDS[subIntent];
+  const candidates = field ? projects.filter((p) => p[field]) : [];
+  if (candidates.length === 1) {
+    return projectReply(candidates[0], subIntent, normalizedText);
   }
 
   return {
