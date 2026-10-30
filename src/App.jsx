@@ -1,6 +1,6 @@
 // App.jsx
-import { useEffect, useState, Suspense, lazy } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, Suspense, lazy } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { MdEmail, MdPhone, MdLocationOn, MdOutlineClear } from "react-icons/md";
 import {
   FaLinkedinIn,
@@ -416,7 +416,8 @@ const About = () => {
               experience.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+            {/* gap-2 when stacked so the two groups read as one list; gap-6 only between side-by-side columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 my-8">
               <div className="space-y-2">
                 <div className="flex">
                   <span className="text-gray-400 min-w-28">Name:</span>
@@ -506,7 +507,7 @@ const Skills = () => {
           Technical <span className="text-blue-400">Skills</span>
         </motion.h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
           {skills.map((skill, index) => (
             <motion.div
               key={skill.name}
@@ -514,11 +515,11 @@ const Skills = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
+              className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl px-2 py-3 sm:p-4 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="text-3xl mb-3">{skill.icon}</div>
-                <h3 className="font-semibold mb-2">{skill.name}</h3>
+                <div className="text-2xl sm:text-3xl mb-2">{skill.icon}</div>
+                <h3 className="text-sm sm:text-base font-semibold">{skill.name}</h3>
               </div>
             </motion.div>
           ))}
@@ -691,16 +692,21 @@ const Projects = () => {
     setCurrent((prev) => (prev - 1 + projects.length) % projects.length);
   };
 
+  // Only auto-advance while the carousel is on screen, so visitors scrolling
+  // down from the top arrive at the first project instead of a later one.
+  const carouselRef = useRef(null);
+  const isInView = useInView(carouselRef, { amount: 0.4 });
+
   // Auto-advance every 5 seconds, looping back to the first project after the
   // last. Re-runs whenever `current` changes, so an arrow or dot click restarts
   // the countdown instead of jumping again right away.
   useEffect(() => {
-    if (isPaused) return undefined;
+    if (isPaused || !isInView) return undefined;
     const timer = setTimeout(() => {
       setCurrent((prev) => (prev + 1) % projects.length);
     }, 5000);
     return () => clearTimeout(timer);
-  }, [current, isPaused, projects.length]);
+  }, [current, isPaused, isInView, projects.length]);
 
   return (
     <section id="projects" className="py-8 bg-gray-800/50">
@@ -712,6 +718,7 @@ const Projects = () => {
         {/* Pause while a mouse is over the card so visitors can read it.
             Mouse only: on touch screens a tap would otherwise pause it for good. */}
         <div
+          ref={carouselRef}
           className="relative max-w-3xl mx-auto"
           onPointerEnter={(e) => e.pointerType === "mouse" && setIsPaused(true)}
           onPointerLeave={(e) => e.pointerType === "mouse" && setIsPaused(false)}
@@ -810,6 +817,11 @@ const Projects = () => {
   );
 };
 
+// name@domain.tld: no spaces, one "@", no empty or trailing dot in the
+// domain, and a TLD of at least 2 letters (so "sanat@gmail." fails).
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[A-Za-z]{2,}$/;
+const INVALID_EMAIL_MESSAGE = "Please enter a valid email address";
+
 // Contact Component
 const Contact = () => {
   const [isSending, setIsSending] = useState(false);
@@ -836,8 +848,11 @@ const Contact = () => {
       errors.name = "Name is required";
     }
 
-    if (!formData.email.trim()) {
+    const email = formData.email.trim();
+    if (!email) {
       errors.email = "Email is required";
+    } else if (!EMAIL_PATTERN.test(email)) {
+      errors.email = INVALID_EMAIL_MESSAGE;
     }
 
     if (!formData.subject.trim()) {
@@ -869,6 +884,7 @@ const Contact = () => {
         // Formspree uses `_subject` as the notification email's subject line.
         body: JSON.stringify({
           ...formData,
+          email: formData.email.trim(),
           _subject: `Portfolio contact: ${formData.subject}`,
         }),
       });
@@ -903,6 +919,14 @@ const Contact = () => {
     });
     if (error[name]) {
       setError({ ...error, [name]: undefined });
+    }
+  };
+
+  // Flag a malformed email as soon as the visitor leaves the field.
+  const handleEmailBlur = () => {
+    const email = formData.email.trim();
+    if (email && !EMAIL_PATTERN.test(email)) {
+      setError((prev) => ({ ...prev, email: INVALID_EMAIL_MESSAGE }));
     }
   };
 
@@ -991,7 +1015,9 @@ const Contact = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Each field reserves an h-4 row for its error, so the visible gap is 16px + 4px.
+                noValidate: those inline errors replace the browser's own pop-up. */}
+            <form onSubmit={handleSubmit} noValidate className="space-y-1">
               <div>
                 <input
                   type="text"
@@ -1001,9 +1027,9 @@ const Contact = () => {
                   placeholder="Your Name"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
-                <div className="h-3">
+                <div className="h-4">
                   {error.name && (
-                    <p className="text-red-400 text-sm">{error.name}</p>
+                    <p className="text-red-400 text-xs leading-4">{error.name}</p>
                   )}
                 </div>
               </div>
@@ -1013,12 +1039,14 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleEmailBlur}
+                  autoComplete="email"
                   placeholder="Your Email"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
-                <div className="h-3">
+                <div className="h-4">
                   {error.email && (
-                    <p className="text-red-400 text-sm">{error.email}</p>
+                    <p className="text-red-400 text-xs leading-4">{error.email}</p>
                   )}
                 </div>
               </div>
@@ -1031,9 +1059,9 @@ const Contact = () => {
                   placeholder="Subject"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
                 />
-                <div className="h-3">
+                <div className="h-4">
                   {error.subject && (
-                    <p className="text-red-400 text-sm">{error.subject}</p>
+                    <p className="text-red-400 text-xs leading-4">{error.subject}</p>
                   )}
                 </div>
               </div>
@@ -1046,9 +1074,9 @@ const Contact = () => {
                   rows="4"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-400 transition-colors resize-none"
                 />
-                <div className="h-3">
+                <div className="h-4">
                   {error.message && (
-                    <p className="text-red-400 text-sm">{error.message}</p>
+                    <p className="text-red-400 text-xs leading-4">{error.message}</p>
                   )}
                 </div>
               </div>

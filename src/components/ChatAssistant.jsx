@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TbSend2, TbSparkles, TbTrash, TbX } from "react-icons/tb";
+import { TbArrowUp, TbSparkles, TbTrash, TbX } from "react-icons/tb";
 import { generateReply, getSuggestedQuestions } from "../utils/chatEngine";
 import { profile } from "../data/portfolioKnowledge";
 
@@ -259,7 +259,7 @@ export default function ChatAssistant() {
 
             {/* Composer */}
             <div className="border-t border-gray-700 p-3 bg-gray-900/90">
-              <div className="flex items-end gap-2">
+              <div className="relative">
                 <label htmlFor="ask-sanat-input" className="sr-only">
                   Type your question for Sanat's portfolio assistant
                 </label>
@@ -271,19 +271,26 @@ export default function ChatAssistant() {
                   onKeyDown={handleKeyDown}
                   rows={1}
                   placeholder="Ask about skills, projects, experience..."
-                  className="flex-1 resize-none max-h-24 bg-gray-800/70 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 transition-colors"
+                  className="block w-full resize-none max-h-24 bg-gray-800/70 border border-gray-700 rounded-lg pl-3 pr-11 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 transition-colors"
                 />
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleSend(input)}
-                  disabled={!input.trim() || isBusy}
-                  aria-label="Send message"
-                  className="shrink-0 w-10 h-10 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
-                >
-                  <TbSend2 size={18} />
-                </motion.button>
+                {/* Send sits inside the input and only appears once there's something to send. */}
+                <AnimatePresence>
+                  {input.trim() && (
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, scale: 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={() => handleSend(input)}
+                      disabled={isBusy}
+                      aria-label="Send message"
+                      className="absolute right-1.5 bottom-[5px] w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+                    >
+                      <TbArrowUp size={16} aria-hidden="true" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
               <p className="text-[10px] text-gray-500 mt-2 text-center">
                 Answers are generated from Sanat's portfolio data only.
